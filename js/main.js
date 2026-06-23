@@ -214,6 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 8. Appointment Form Validation & Submission (for contact.html & index.html)
     const bookingForm = document.getElementById('appointment-form');
     const formAlert = document.getElementById('form-alert');
+    // Paste your Google Script Web App URL here after deploying (e.g. 'https://script.google.com/macros/s/XXXXX/exec')
+    const GOOGLE_SHEET_WEB_APP_URL = '';
 
     if (bookingForm) {
         bookingForm.addEventListener('submit', (e) => {
@@ -222,10 +224,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Simple validation
             const name = document.getElementById('name').value.trim();
             const phone = document.getElementById('phone').value.trim();
-            const email = document.getElementById('email').value.trim();
+            const email = document.getElementById('email').value.trim() || 'N/A';
             const branch = document.getElementById('branch').value;
             const date = document.getElementById('date').value;
-            const message = document.getElementById('message').value.trim();
+            const treatment = document.getElementById('treatment') ? document.getElementById('treatment').value : 'General Checkup';
+            const message = document.getElementById('message').value.trim() || 'No message';
 
             if (!name || !phone || !branch || !date) {
                 showFormAlert('Please fill out all required fields.', 'error');
@@ -239,9 +242,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Mock submission success
-            showFormAlert('Thank you! Your appointment request has been submitted. We will contact you shortly to confirm your slot.', 'success');
-            bookingForm.reset();
+            if (GOOGLE_SHEET_WEB_APP_URL) {
+                const submitButton = bookingForm.querySelector('button[type="submit"]');
+                const originalBtnText = submitButton.innerHTML;
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+
+                // Send request via POST
+                fetch(GOOGLE_SHEET_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        phone: phone,
+                        email: email,
+                        branch: branch,
+                        date: date,
+                        treatment: treatment,
+                        message: message
+                    })
+                })
+                .then(() => {
+                    showFormAlert('Thank you! Your appointment request has been submitted. We will contact you shortly to confirm your slot.', 'success');
+                    bookingForm.reset();
+                })
+                .catch((error) => {
+                    console.error('Error submitting form:', error);
+                    showFormAlert('There was an issue sending your request. Please try again or call us directly.', 'error');
+                })
+                .finally(() => {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalBtnText;
+                });
+            } else {
+                // Mock submission success (for testing local fallback)
+                console.log('Mock Form Data:', { name, phone, email, branch, date, treatment, message });
+                showFormAlert('Thank you! [Local Mock Submission] Your appointment request has been submitted successfully.', 'success');
+                bookingForm.reset();
+            }
         });
 
         function showFormAlert(msg, type) {
