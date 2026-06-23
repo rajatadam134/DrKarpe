@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bookingForm = document.getElementById('appointment-form');
     const formAlert = document.getElementById('form-alert');
     // Paste your Google Script Web App URL here after deploying (e.g. 'https://script.google.com/macros/s/XXXXX/exec')
-    const GOOGLE_SHEET_WEB_APP_URL = '';
+    const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyVPgryFGjCldx0mytUa0PbFvIEOYcQUo4jxfFYGp_Yvz2CyrPLsgvAnriHfMZScMhb6A/exec';
 
     if (bookingForm) {
         bookingForm.addEventListener('submit', (e) => {
